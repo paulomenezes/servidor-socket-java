@@ -1,90 +1,118 @@
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashMap;
 
 /**
  * Created by paulomenezes on 17/11/15.
  */
 public class Servidor {
+	
+	
+	public static String getArquivo(String arquivo) throws FileNotFoundException{
+		
+			 BufferedReader in = new BufferedReader(new FileReader(arquivo));
+			 String str;
+			 StringBuffer buf = new StringBuffer();
+			 try {
+				while (in.ready()) {
+				  str = in.readLine();
+				  buf.append(str);
+				 }
+				 in.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			 
+			 
+			 return buf.toString();
+	}
+	
+	
+	
     public static void main(String[] arg) {
+    	
+        DataInputStream in;
+        DataOutputStream out = null;
         ServerSocket s;
-
-        // P√°ginas
-        HashMap<String, String> paginas = new HashMap<>();
-        paginas.put("index.htm", "Essa √© o <neg>index.htm</neg>\n\n<ita>It√°lico</ita>\n<neg>Negrito</neg>\n<sub>Sublinhado</sub>");
-        paginas.put("contato.htm", "Essa √© o <tam 20>contato.htm</tam>");
-        paginas.put("sobre.htm", "Essa √© o sobre.htm");
-        paginas.put("error.htm", "Essa √© o error.htm");
+        Socket cliente;
+        
 
         try {
             int p = 6789;
             s = new ServerSocket(p);
             System.out.println("Servidor iniciado na porta " + p);
-            Socket cliente = s.accept();
+            cliente = s.accept();
 
             System.out.println("Conex√£o estabelecida (" + cliente + ")");
-            DataInputStream in = new DataInputStream(cliente.getInputStream());
-            DataOutputStream out = new DataOutputStream(cliente.getOutputStream());
-
-            // String que o servidor recebe dos clientes
+            in = new DataInputStream(cliente.getInputStream());
+            out = new DataOutputStream(cliente.getOutputStream());
+            
+            //String Sucesso Na RequisiÁ„o
+            String sucesso = "HTTP/1.0 200 OK ";
+           
+            //	String que o servidor recebe dos clientes
             String recebe = "";
 
             do {
                 // Ler os dados do Cliente
                 recebe = in.readUTF();
-                // Printa no console a requisi√ß√£o
+                // Printa no console a requisiÁ„o
                 System.out.print(recebe + " -- ");
 
-                // Divide a requsi√ß√£o
-                String[] parametros = recebe.split(" ");
+                // Divide a requisiÁ„o
+                String[] parametros = recebe.split("/");
 
-                String saida = "";
-                boolean escever = false;
-
-                // V√°lida os par√¢metros. Se come√ßou com GET
+                // Valida os parametros.
                 if (parametros.length == 3 && parametros[0].equals("GET")) {
-                    // Se terminar com HTTP/1.0
-                    if (parametros[2].equals("HTTP/1.0")) {
-                        String sucesso = "HTTP/1.0 200 Success\n";
-                        // Se a p√°gina existe no dicion√°rio
-                        if (parametros[1].startsWith("/") && paginas.containsKey(parametros[1].substring(1))) {
-                            saida = sucesso;
-                            out.writeUTF(sucesso + paginas.get(parametros[1].substring(1)));
-
-                            escever = true;
-                        } else {
-                            // Se for igual a '/', mostra o index.htm
-                            if (parametros[1].equals("/") && paginas.containsKey("index.htm")) {
-                                saida = sucesso;
-                                out.writeUTF(sucesso + paginas.get("index.htm"));
-
-                                escever = true;
-                            } else {
-                                saida = "HTTP/1.0 404 Not found";
-                            }
-                        }
-                    } else {
-                        saida = "HTTP/1.0 400 Bad request";
+                    
+                	//RequisiÁ„o HTTP INDEX
+                    if (parametros[1].equals("HTTP")) {
+                    	
+                        	out.writeUTF(sucesso + getArquivo("index.htm"));
+                    //Outros tipos de Arquivos    	
+                    }else{
+                    	
+                    	String[] outroArquivo = parametros[0].split(" ");
+                    	
+                    	
+                    	if(outroArquivo[0].equals("teste.htm")){
+                    		
+                    		out.writeUTF(sucesso + getArquivo("teste.htm"));
+                    		
+                    	}else{
+                    		
+                    		out.writeUTF(sucesso + getArquivo("sobre.htm") );
+                    	}
                     }
-                } else {
-                    saida = "HTTP/1.0 400 Bad request";
+                 //FormatoIncorreto   
+                }else{
+                	
+                	out.writeUTF("400 BAD REQUEST");
                 }
-
-                if (!escever)
-                    out.writeUTF(saida);
-
-                System.out.print(saida);
-                System.out.println();
+                
             } while (recebe.length() > 0);
 
             cliente.close();
-            System.out.println("Conex√£o encerrada.");
+            System.out.println("Conex„o encerrada.");
+            
+        }catch (FileNotFoundException e){    
+        	
+        	try {
+				out.writeUTF("404 HTTP Not Found");
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				System.out.println(e1.getMessage());
+			}
 
-        } catch(Exception e) {
-            e.printStackTrace();
-            System.out.println("Erro: " + e.getMessage());
-        }
+        } catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 }

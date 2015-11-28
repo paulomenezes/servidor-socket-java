@@ -1,7 +1,8 @@
-import javax.swing.*;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.Socket;
+
+import javax.swing.JOptionPane;
 
 /**
  * Created by paulomenezes on 17/11/15.
@@ -11,6 +12,9 @@ public class Cliente {
         Socket s = null;
 
         try {
+        	
+        	System.out.println("<html><b>Guilherme melo</b></html>");
+        	
             System.out.println("Conectando...");
 
             s = new Socket("localhost", 6789);
@@ -20,14 +24,18 @@ public class Cliente {
             String pagina = "";
 
             do {
-                pagina = JOptionPane.showInputDialog(null, "Digite sua requisi√ß√£o");
+                pagina = JOptionPane.showInputDialog(null, "Digite sua requisiÁ„o");
 
                 out.writeUTF(pagina);
                 out.flush();
 
                 String recebe = in.readUTF();
+                
 
-                String sucesso = "HTTP/1.0 200 Success";
+                String sucesso = "HTTP/1.0 200 OK";
+                
+                System.out.println(recebe);
+                
                 if (recebe.contains(sucesso)) {
                     String resultado = recebe.substring(sucesso.length() + 1);
 
@@ -47,11 +55,16 @@ public class Cliente {
                 } else {
                     JOptionPane.showMessageDialog(null, recebe);
                 }
+                
             } while (pagina.length() > 0);
+            
         } catch(Exception e) {
+        	
             e.printStackTrace();
             System.out.println("Erro: " + e.getMessage());
+            
         } finally {
+        	
             try {
                 if(s != null)
                     s.close();
@@ -60,7 +73,7 @@ public class Cliente {
             }
         }
 
-        System.out.println("Conex√£o encerrada");
+        System.out.println("Conex„o encerrada");
 
         try {
             System.in.read();
