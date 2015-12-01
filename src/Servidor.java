@@ -12,36 +12,27 @@ import java.net.Socket;
  */
 public class Servidor {
 	
-	
-	public static String getArquivo(String arquivo) throws FileNotFoundException{
-		
-			 BufferedReader in = new BufferedReader(new FileReader(arquivo));
-			 String str;
-			 StringBuffer buf = new StringBuffer();
-			 try {
-				while (in.ready()) {
-				  str = in.readLine();
-				  buf.append(str);
-				 }
-				 in.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			 
-			 
-			 return buf.toString();
+	public static String getArquivo(String arquivo) throws IOException {
+        BufferedReader in = new BufferedReader(new FileReader(arquivo));
+        String str;
+        StringBuffer buf = new StringBuffer();
+
+        while (in.ready()) {
+            str = in.readLine();
+            buf.append(str);
+        }
+
+        in.close();
+
+        return buf.toString();
 	}
 	
-	
-	
     public static void main(String[] arg) {
-    	
         DataInputStream in;
         DataOutputStream out = null;
+
         ServerSocket s;
         Socket cliente;
-        
 
         try {
             int p = 6789;
@@ -52,67 +43,56 @@ public class Servidor {
             System.out.println("Conex√£o estabelecida (" + cliente + ")");
             in = new DataInputStream(cliente.getInputStream());
             out = new DataOutputStream(cliente.getOutputStream());
-            
-            //String Sucesso Na RequisiÁ„o
-            String sucesso = "HTTP/1.0 200 OK ";
-           
+
+            //String Sucesso Na Requisi√ß√£o
+            String sucesso = "HTTP/1.0 200 OK";
+
             //	String que o servidor recebe dos clientes
             String recebe = "";
 
             do {
                 // Ler os dados do Cliente
                 recebe = in.readUTF();
-                // Printa no console a requisiÁ„o
-                System.out.print(recebe + " -- ");
 
-                // Divide a requisiÁ„o
-                String[] parametros = recebe.split("/");
+                if (recebe.length() > 0) {
+                    // Printa no console a requisi√ß√£o
+                    System.out.print(recebe + " -- ");
 
-                // Valida os parametros.
-                if (parametros.length == 3 && parametros[0].equals("GET")) {
-                    
-                	//RequisiÁ„o HTTP INDEX
-                    if (parametros[1].equals("HTTP")) {
-                    	
-                        	out.writeUTF(sucesso + getArquivo("index.htm"));
-                    //Outros tipos de Arquivos    	
-                    }else{
-                    	
-                    	String[] outroArquivo = parametros[0].split(" ");
-                    	
-                    	
-                    	if(outroArquivo[0].equals("teste.htm")){
-                    		
-                    		out.writeUTF(sucesso + getArquivo("teste.htm"));
-                    		
-                    	}else{
-                    		
-                    		out.writeUTF(sucesso + getArquivo("sobre.htm") );
-                    	}
+                    // Divide a requisi√ß√£o
+                    String[] parametros = recebe.split(" ");
+
+                    // Valida os parametros.
+                    if (parametros.length == 3 && parametros[0].equals("GET")) {
+                        // Requisi√ß√£o HTTP INDEX
+                        if (parametros[2].equals("HTTP/1.0")) {
+                            try {
+                                if (parametros[1].equals("/")) {
+                                    out.writeUTF(sucesso + getArquivo("index.htm"));
+                                } else {
+                                    out.writeUTF(sucesso + getArquivo(parametros[1].substring(1)));
+                                }
+                                System.out.print(sucesso);
+                            } catch (IOException e) {
+                                out.writeUTF("404 HTTP Not Found");
+                                System.out.print("404 HTTP Not Found");
+                            }
+                        } else {
+                            out.writeUTF("400 BAD REQUEST");
+                            System.out.print("400 BAD REQUEST");
+                        }
+                    } else {
+                        out.writeUTF("400 BAD REQUEST");
+                        System.out.print("400 BAD REQUEST");
                     }
-                 //FormatoIncorreto   
-                }else{
-                	
-                	out.writeUTF("400 BAD REQUEST");
                 }
-                
+
+                System.out.println();
             } while (recebe.length() > 0);
 
             cliente.close();
-            System.out.println("Conex„o encerrada.");
-            
-        }catch (FileNotFoundException e){    
-        	
-        	try {
-				out.writeUTF("404 HTTP Not Found");
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				System.out.println(e1.getMessage());
-			}
+            System.out.println("Conex√£o encerrada.");
+        } catch (Exception e) {
 
-        } catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+        }
     }
 }

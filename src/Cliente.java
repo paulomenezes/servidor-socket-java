@@ -1,6 +1,8 @@
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.Socket;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.JOptionPane;
 
@@ -8,13 +10,15 @@ import javax.swing.JOptionPane;
  * Created by paulomenezes on 17/11/15.
  */
 public class Cliente {
+    public static int indexOf(Pattern pattern, String s) {
+        Matcher matcher = pattern.matcher(s);
+        return matcher.find() ? matcher.start() : -1;
+    }
+
     public static void main(String[] arg) {
         Socket s = null;
 
         try {
-        	
-        	System.out.println("<html><b>Guilherme melo</b></html>");
-        	
             System.out.println("Conectando...");
 
             s = new Socket("localhost", 6789);
@@ -24,23 +28,19 @@ public class Cliente {
             String pagina = "";
 
             do {
-                pagina = JOptionPane.showInputDialog(null, "Digite sua requisiÁ„o");
+                pagina = JOptionPane.showInputDialog(null, "Digite sua requisi√ß√£o");
 
                 out.writeUTF(pagina);
                 out.flush();
 
                 String recebe = in.readUTF();
-                
-
                 String sucesso = "HTTP/1.0 200 OK";
                 
-                System.out.println(recebe);
-                
                 if (recebe.contains(sucesso)) {
-                    String resultado = recebe.substring(sucesso.length() + 1);
+                    String resultado = recebe.substring(sucesso.length());
 
-                    resultado = resultado.replaceAll("\n", "<br />");
-                    resultado = "<html>" + resultado + "</html>";
+                    resultado = resultado.replaceAll("<htm>", "<html>");
+                    resultado = resultado.replaceAll("</htm>", "</html>");
 
                     resultado = resultado.replaceAll("<neg>", "<b>");
                     resultado = resultado.replaceAll("</neg>", "</b>");
@@ -50,6 +50,15 @@ public class Cliente {
 
                     resultado = resultado.replaceAll("<sub>", "<u>");
                     resultado = resultado.replaceAll("</sub>", "</u>");
+
+                    int index = indexOf(Pattern.compile("(<tamanho.*?>)"), resultado);
+                    if (index > 0) {
+                        resultado = resultado.replaceAll("</tamanho>", "</font>");
+                        String tamanho = resultado.substring(index, index + resultado.substring(index).indexOf(">") + 1);
+                        resultado = resultado.replaceAll(tamanho, tamanho.split(" ")[0].replace("tamanho", "font") + " size=\"" + tamanho.split(" ")[1].replace(">", "") + "\">");
+                    }
+
+                    System.out.println(resultado);
 
                     JOptionPane.showMessageDialog(null, resultado);
                 } else {
@@ -73,7 +82,7 @@ public class Cliente {
             }
         }
 
-        System.out.println("Conex„o encerrada");
+        System.out.println("Conex√£o encerrada");
 
         try {
             System.in.read();
