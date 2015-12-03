@@ -1,21 +1,20 @@
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 /**
- * Created by paulomenezes on 17/11/15.
+ * Criado por Guilherme Melo e Paulo Menezes
+ * Projeto de Redes - Jeisa
  */
 public class Servidor {
-	
-	public static String getArquivo(String arquivo) throws IOException {
+    private static final String OK = "HTTP/1.0 200 OK";
+    private static final String NOTFOUND = "HTTP/1.0 404 NOT FOUND";
+    private static final String BADREQUEST = "HTTP/1.0 400 BAD REQUEST";
+
+    public static String getArquivo(String arquivo) throws IOException {
         BufferedReader in = new BufferedReader(new FileReader(arquivo));
         String str;
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
 
         while (in.ready()) {
             str = in.readLine();
@@ -29,7 +28,7 @@ public class Servidor {
 	
     public static void main(String[] arg) {
         DataInputStream in;
-        DataOutputStream out = null;
+        DataOutputStream out;
 
         ServerSocket s;
         Socket cliente;
@@ -44,11 +43,8 @@ public class Servidor {
             in = new DataInputStream(cliente.getInputStream());
             out = new DataOutputStream(cliente.getOutputStream());
 
-            //String Sucesso Na Requisição
-            String sucesso = "HTTP/1.0 200 OK";
-
             //	String que o servidor recebe dos clientes
-            String recebe = "";
+            String recebe;
 
             do {
                 // Ler os dados do Cliente
@@ -67,22 +63,22 @@ public class Servidor {
                         if (parametros[2].equals("HTTP/1.0")) {
                             try {
                                 if (parametros[1].equals("/")) {
-                                    out.writeUTF(sucesso + getArquivo("index.htm"));
+                                    out.writeUTF(OK + getArquivo("index.htm"));
                                 } else {
-                                    out.writeUTF(sucesso + getArquivo(parametros[1].substring(1)));
+                                    out.writeUTF(OK + getArquivo(parametros[1].substring(1)));
                                 }
-                                System.out.print(sucesso);
+                                System.out.print(OK);
                             } catch (IOException e) {
-                                out.writeUTF("404 HTTP Not Found");
-                                System.out.print("404 HTTP Not Found");
+                                out.writeUTF(NOTFOUND);
+                                System.out.print(NOTFOUND);
                             }
                         } else {
-                            out.writeUTF("400 BAD REQUEST");
-                            System.out.print("400 BAD REQUEST");
+                            out.writeUTF(BADREQUEST);
+                            System.out.print(BADREQUEST);
                         }
                     } else {
-                        out.writeUTF("400 BAD REQUEST");
-                        System.out.print("400 BAD REQUEST");
+                        out.writeUTF(BADREQUEST);
+                        System.out.print(BADREQUEST);
                     }
                 }
 
@@ -92,7 +88,7 @@ public class Servidor {
             cliente.close();
             System.out.println("Conexão encerrada.");
         } catch (Exception e) {
-
+            System.out.println("Erro interno.");
         }
     }
 }
