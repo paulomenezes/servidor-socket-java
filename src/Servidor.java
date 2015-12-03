@@ -39,7 +39,7 @@ public class Servidor {
             System.out.println("Servidor iniciado na porta " + p);
             cliente = s.accept();
 
-            System.out.println("Conex√£o estabelecida (" + cliente + ")");
+            System.out.println("Conex„o estabelecida (" + cliente + ")");
             in = new DataInputStream(cliente.getInputStream());
             out = new DataOutputStream(cliente.getOutputStream());
 
@@ -51,10 +51,10 @@ public class Servidor {
                 recebe = in.readUTF();
 
                 if (recebe.length() > 0) {
-                    // Printa no console a requisi√ß√£o
+                    // Printa no console a requisiÁ„o
                     System.out.print(recebe + " -- ");
 
-                    // Divide a requisi√ß√£o
+                    // Divide a requisiÁ„o
                     String[] parametros = recebe.split(" ");
 
                     // Valida os parametros.
@@ -86,7 +86,7 @@ public class Servidor {
             } while (recebe.length() > 0);
 
             cliente.close();
-            System.out.println("Conex√£o encerrada.");
+            System.out.println("Conex„o encerrada.");
         } catch (Exception e) {
             System.out.println("Erro interno.");
         }

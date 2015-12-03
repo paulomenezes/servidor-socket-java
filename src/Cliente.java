@@ -48,14 +48,14 @@ public class Cliente {
         try {
             System.out.println("Conectando...");
 
-            s = new Socket("localhost", 6789);
+            s = new Socket("localhost", 6789); //->COLOCAR ENDERECO IP DO SERVIDOR AQUI
             DataInputStream in = new DataInputStream(s.getInputStream());
             DataOutputStream out = new DataOutputStream(s.getOutputStream());
 
             String pagina;
 
             do {
-                pagina = JOptionPane.showInputDialog(null, "Digite sua requisi√ß√£o");
+                pagina = JOptionPane.showInputDialog(null, "Digite sua requisicao");
 
                 if (pagina != null && pagina.length() > 0) {
 
@@ -110,10 +110,10 @@ public class Cliente {
                     } else {
                         switch (recebe) {
                             case NOTFOUND:
-                                JOptionPane.showMessageDialog(null, "Desculpe, mas a p√°gina solicitada n√£o foi encontrada.");
+                                JOptionPane.showMessageDialog(null, "Desculpe, mas a p·gina solicitada n„o foi encontrada.");
                                 break;
                             case BADREQUEST:
-                                JOptionPane.showMessageDialog(null, "Desculpe, mas houve um erro na requisi√ß√£o.");
+                                JOptionPane.showMessageDialog(null, "Desculpe, mas houve um erro na requisiÁ„o.");
                                 break;
                             default:
                                 JOptionPane.showMessageDialog(null, "Erro desconhecido.");
@@ -136,6 +136,6 @@ public class Cliente {
             }
         }
 
-        System.out.println("Conex√£o encerrada");
+        System.out.println("Conex„o encerrada");
     }
 }
